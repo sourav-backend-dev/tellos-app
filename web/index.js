@@ -194,7 +194,7 @@ app.post("/api/recurring_application_charge", async (req, res) => {
   if (typeof name !== 'string' || typeof price !== 'string') {
     return res.status(400).send('Invalid plan type or price');
   }
-
+console.log("hi");
   const recurring_application_charge = new shopify.api.rest.RecurringApplicationCharge({session: res.locals.shopify.session});
   recurring_application_charge.name = name;
   recurring_application_charge.price = parseFloat(price);
