@@ -1,83 +1,72 @@
 import { DeliveryMethod } from "@shopify/shopify-api";
+import crypto from 'crypto';
+import 'dotenv/config';
+import http from 'http';
+
+async function verifyShopifyWebhooks(req, res, next) {
+
+  const hmac = req.query.hmac;
+
+  if (!hmac) {
+    return res.status(401).send("Webhook must originate from Shopify!");
+  }
+  const genHash = crypto
+    .createHmac("sha256", process.env.SHOPIFY_API_SECRET)
+    .update(JSON.stringify(req.body))
+    .digest("base64");
+
+  if (genHash !== hmac) {
+    return res.status(401).send("Couldn't verify incoming Webhook request!");
+  }
+
+next();
+
+}
 
 export default {
-  /**
-   * Customers can request their data from a store owner. When this happens,
-   * Shopify invokes this webhook.
-   *
-   * https://shopify.dev/docs/apps/webhooks/configuration/mandatory-webhooks#customers-data_request
-   */
+  APP_UNINSTALLED: {
+    deliveryMethod: DeliveryMethod.Http,
+    callbackUrl: "/api/webhooks/app-uninstall",
+    callback: async (topic, shop) => {
+      // Make HTTP request to the specified API endpoint
+      try {
+          const response = await fetch(process.env.TELLOS_API_BASE_URL+`shopify/uninstall?shop=${shop}`);
+          if (!response.ok) {
+            throw new Error('Failed to hit the API endpoint');
+          }
+        } catch (error) {
+          console.error("Error hitting API endpoint:", error);
+        }
+    },
+  },
   CUSTOMERS_DATA_REQUEST: {
     deliveryMethod: DeliveryMethod.Http,
     callbackUrl: "/api/webhooks",
+    verifyShopifyWebhooks,
     callback: async (topic, shop, body, webhookId) => {
       const payload = JSON.parse(body);
-      // Payload has the following shape:
-      // {
-      //   "shop_id": 954889,
-      //   "shop_domain": "{shop}.myshopify.com",
-      //   "orders_requested": [
-      //     299938,
-      //     280263,
-      //     220458
-      //   ],
-      //   "customer": {
-      //     "id": 191167,
-      //     "email": "john@example.com",
-      //     "phone": "555-625-1199"
-      //   },
-      //   "data_request": {
-      //     "id": 9999
-      //   }
-      // }
+      console.log("Received customer data request webhook:", payload);
+      res.sendStatus(200);
     },
   },
-
-  /**
-   * Store owners can request that data is deleted on behalf of a customer. When
-   * this happens, Shopify invokes this webhook.
-   *
-   * https://shopify.dev/docs/apps/webhooks/configuration/mandatory-webhooks#customers-redact
-   */
   CUSTOMERS_REDACT: {
     deliveryMethod: DeliveryMethod.Http,
     callbackUrl: "/api/webhooks",
+    verifyShopifyWebhooks,
     callback: async (topic, shop, body, webhookId) => {
       const payload = JSON.parse(body);
-      // Payload has the following shape:
-      // {
-      //   "shop_id": 954889,
-      //   "shop_domain": "{shop}.myshopify.com",
-      //   "customer": {
-      //     "id": 191167,
-      //     "email": "john@example.com",
-      //     "phone": "555-625-1199"
-      //   },
-      //   "orders_to_redact": [
-      //     299938,
-      //     280263,
-      //     220458
-      //   ]
-      // }
+      console.log("Received customer data redact webhook:", payload);
+      res.sendStatus(200);
     },
   },
-
-  /**
-   * 48 hours after a store owner uninstalls your app, Shopify invokes this
-   * webhook.
-   *
-   * https://shopify.dev/docs/apps/webhooks/configuration/mandatory-webhooks#shop-redact
-   */
   SHOP_REDACT: {
     deliveryMethod: DeliveryMethod.Http,
     callbackUrl: "/api/webhooks",
+    verifyShopifyWebhooks,
     callback: async (topic, shop, body, webhookId) => {
       const payload = JSON.parse(body);
-      // Payload has the following shape:
-      // {
-      //   "shop_id": 954889,
-      //   "shop_domain": "{shop}.myshopify.com"
-      // }
+      console.log("Received shop data redact webhook:", payload);
+      res.sendStatus(200);
     },
   },
 };

@@ -53,16 +53,14 @@ export default function PricingPage() {
     if (result) {
       setChargeIdVal(true);
       window.location.href = "https://www.tellos-admin.com/";
-    }else{
+    } else {
       setChargeIdVal(false);
     }
   });
 
-  if(chargeIdVal){
-    return (
-      <></>
-    );
-  }else{
+  if (chargeIdVal) {
+    return <></>;
+  } else {
     return (
       <>
         <nav className="navbar">
@@ -70,8 +68,8 @@ export default function PricingPage() {
             <img
               src="https://assets-global.website-files.com/64937c656472d090d3fe4d07/64a07038d429f3091438c221_Tellos%20logo%20(1)%20(1)-p-1600.png"
               alt="Example Image"
-              height={50}
-              width={130}
+              height={40}
+              width={100}
             />
           </div>
         </nav>
@@ -80,6 +78,8 @@ export default function PricingPage() {
           <div className="pricing-content">
             <div className="pricing-title">
               <h2>Get the right plan for your brand</h2>
+              <div class="spacer-xs"></div>
+              <p class="paragraph-12"><strong class="bold-text-3">Zero commitment, 100% results: <br/>Try us free for 30 days</strong></p>
             </div>
           </div>
 
@@ -110,7 +110,7 @@ export default function PricingPage() {
               <div className="chart-cont2">
                 <div className="chart-btn">
                   <button onClick={() => handleButtonClick("Basic", 49)}>
-                    Contact for free trial
+                    Buy Now
                   </button>
                 </div>
               </div>
@@ -122,32 +122,53 @@ export default function PricingPage() {
                 <div className="chart-cont3_2">
                   <ul>
                     <li>
-                      <div className="tick-cont"></div>
+                      <img
+                        alt=""
+                        loading="lazy"
+                        src="https://assets-global.website-files.com/65d9085f29fac4267a960bfb/65d9086029fac4267a960c40_check.svg"
+                        class="check-img"
+                      />
                       <div className="list-content">
-                        <p>✔ In-video cart integration</p>
+                        <p>In-video cart integration</p>
                       </div>
                     </li>
                     <li>
-                      <div className="tick-cont"></div>
+                      <img
+                        alt=""
+                        loading="lazy"
+                        src="https://assets-global.website-files.com/65d9085f29fac4267a960bfb/65d9086029fac4267a960c40_check.svg"
+                        class="check-img"
+                      />
                       <div className="list-content">
-                        <p>✔ Email and chat support</p>
+                        <p> Email and chat support</p>
                       </div>
                     </li>
                     <li>
-                      <div className="tick-cont"></div>
+                      <img
+                        alt=""
+                        loading="lazy"
+                        src="https://assets-global.website-files.com/65d9085f29fac4267a960bfb/65d9086029fac4267a960c40_check.svg"
+                        class="check-img"
+                      />
                       <div className="list-content">
-                        <p>✔ Integrate Instagram and TikTok</p>
+                        <p> Integrate Instagram and TikTok</p>
                       </div>
                     </li>
                     <li>
-                      <div className="tick-cont"></div>
+                      <img
+                        alt=""
+                        loading="lazy"
+                        src="https://assets-global.website-files.com/65d9085f29fac4267a960bfb/65d9086029fac4267a960c40_check.svg"
+                        class="check-img"
+                      />
                       <div className="list-content">
-                        <p>✔ Video CMS</p>
+                        <p> Video CMS</p>
                       </div>
                     </li>
                   </ul>
                 </div>
               </div>
+              <div class="ribbon-2">30-Days Free Trial</div>
             </div>
             <div className="pricing-chart char-1">
               <div className="chart-cont1">
@@ -175,7 +196,7 @@ export default function PricingPage() {
               <div className="chart-cont2">
                 <div className="chart-btn">
                   <button onClick={() => handleButtonClick("Business", 199)}>
-                    Contact for free trial
+                    Buy Now
                   </button>
                 </div>
               </div>
@@ -187,32 +208,53 @@ export default function PricingPage() {
                 <div className="chart-cont3_2">
                   <ul>
                     <li>
-                      <div className="tick-cont"></div>
+                      <img
+                        alt=""
+                        loading="lazy"
+                        src="https://assets-global.website-files.com/65d9085f29fac4267a960bfb/65d9086029fac4267a960c40_check.svg"
+                        class="check-img"
+                      />
                       <div className="list-content">
-                        <p>✔ Unique EXPLORE view</p>
+                        <p> Unique EXPLORE view</p>
                       </div>
                     </li>
                     <li>
-                      <div className="tick-cont"></div>
+                      <img
+                        alt=""
+                        loading="lazy"
+                        src="https://assets-global.website-files.com/65d9085f29fac4267a960bfb/65d9086029fac4267a960c40_check.svg"
+                        class="check-img"
+                      />
                       <div className="list-content">
-                        <p>✔ Video search</p>
+                        <p> Video search</p>
                       </div>
                     </li>
                     <li>
-                      <div className="tick-cont"></div>
+                      <img
+                        alt=""
+                        loading="lazy"
+                        src="https://assets-global.website-files.com/65d9085f29fac4267a960bfb/65d9086029fac4267a960c40_check.svg"
+                        class="check-img"
+                      />
                       <div className="list-content">
-                        <p>✔ Performance Optimization</p>
+                        <p> Performance Optimization</p>
                       </div>
                     </li>
                     <li>
-                      <div className="tick-cont"></div>
+                      <img
+                        alt=""
+                        loading="lazy"
+                        src="https://assets-global.website-files.com/65d9085f29fac4267a960bfb/65d9086029fac4267a960c40_check.svg"
+                        class="check-img"
+                      />
                       <div className="list-content">
-                        <p>✔ Assisted implementation</p>
+                        <p> Assisted implementation</p>
                       </div>
                     </li>
                   </ul>
                 </div>
               </div>
+              <div class="ribbon-2">30-Days Free Trial</div>
             </div>
             <div className="pricing-chart char-1">
               <div className="chart-cont1">
@@ -240,11 +282,10 @@ export default function PricingPage() {
               <div className="chart-cont2">
                 <div className="chart-btn">
                   <button onClick={() => handleButtonClick("Premium", 299)}>
-                    Contact for free trial
+                    Buy Now
                   </button>
                 </div>
               </div>
-
               <div className="chart-cont3">
                 <div className="chart-cont3_1">
                   <h4>Everything in Business, plus:</h4>
@@ -252,93 +293,53 @@ export default function PricingPage() {
                 <div className="chart-cont3_2">
                   <ul>
                     <li>
-                      <div className="tick-cont"></div>
+                      <img
+                        alt=""
+                        loading="lazy"
+                        src="https://assets-global.website-files.com/65d9085f29fac4267a960bfb/65d9086029fac4267a960c40_check.svg"
+                        class="check-img"
+                      />
                       <div className="list-content">
-                        <p>✔ Dedicated success manager</p>
+                        <p> Dedicated success manager</p>
                       </div>
                     </li>
                     <li>
-                      <div className="tick-cont"></div>
+                      <img
+                        alt=""
+                        loading="lazy"
+                        src="https://assets-global.website-files.com/65d9085f29fac4267a960bfb/65d9086029fac4267a960c40_check.svg"
+                        class="check-img"
+                      />
                       <div className="list-content">
-                        <p>✔ Advanced analytics</p>
+                        <p> Advanced analytics</p>
                       </div>
                     </li>
                     <li>
-                      <div className="tick-cont"></div>
+                      <img
+                        alt=""
+                        loading="lazy"
+                        src="https://assets-global.website-files.com/65d9085f29fac4267a960bfb/65d9086029fac4267a960c40_check.svg"
+                        class="check-img"
+                      />
                       <div className="list-content">
-                        <p>✔ Unlimited videos</p>
+                        <p> Unlimited videos</p>
                       </div>
                     </li>
                     <li>
-                      <div className="tick-cont"></div>
+                      <img
+                        alt=""
+                        loading="lazy"
+                        src="https://assets-global.website-files.com/65d9085f29fac4267a960bfb/65d9086029fac4267a960c40_check.svg"
+                        class="check-img"
+                      />
                       <div className="list-content">
-                        <p>✔ Advanced A/B testing</p>
+                        <p> Advanced A/B testing</p>
                       </div>
                     </li>
                   </ul>
                 </div>
               </div>
-            </div>
-            <div className="pricing-chart char-1">
-              <div className="chart-cont1">
-                <div className="chart-cont1_1">
-                  <div className="chart-title">
-                    <h1>Growth</h1>
-                  </div>
-                  <div className="chart-desc">
-                    <p>Best for online brands with over 150k visitors/mo</p>
-                  </div>
-                </div>
-
-                <div className="chart-cont1_2">
-                  <div className="chart-pricing-cont">
-                    <h1>Custom pricing</h1>
-                  </div>
-                  <div className="chart-pricing-cont">
-                    <p>Unlimited views/month</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="chart-cont2">
-                <div className="chart-btn">
-                  <button>Contact for free trial</button>
-                </div>
-              </div>
-
-              <div className="chart-cont3">
-                <div className="chart-cont3_1">
-                  <h4>Everything in Premium, plus:</h4>
-                </div>
-                <div className="chart-cont3_2">
-                  <ul>
-                    <li>
-                      <div className="tick-cont"></div>
-                      <div className="list-content">
-                        <p>✔ AI products auto tagging</p>
-                      </div>
-                    </li>
-                    <li>
-                      <div className="tick-cont"></div>
-                      <div className="list-content">
-                        <p>✔ Early access to new features</p>
-                      </div>
-                    </li>
-                    <li>
-                      <div className="tick-cont"></div>
-                      <div className="list-content">
-                        <p>✔ White-Glove onboarding</p>
-                      </div>
-                    </li>
-                    <li>
-                      <div className="tick-cont"></div>
-                      <div className="list-content">
-                        <p>✔ Customizable CTA Buttons</p>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
-              </div>
+              <div class="ribbon-2">30-Days Free Trial</div>
             </div>
           </div>
         </div>

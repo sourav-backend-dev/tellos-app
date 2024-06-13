@@ -1,54 +1,22 @@
 <script>
-  function loadScript(url, callback) {
-    var script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.src = url;
-    script.onload = callback;
-    document.head.appendChild(script);
-  }
-
-  if (typeof jQuery == 'undefined') {
-    loadScript("{{ 'jquery-min.js' | asset_url }}", function() {
-      var SCRIPT_SAVE_API_BASE_URL = "https://jsframework.kaswebtechsolutions.com/";
-      var settings = {
-        "url": SCRIPT_SAVE_API_BASE_URL + "tellos/tellos_api.php?shop_url=tellos_js_{{request.host}}",
-        "method": "GET",
-        "timeout": 0,
-      };
-      $.ajax(settings).done(function(response) {
-        var jsonResponse = JSON.parse(response);
-        var tellosScript = jsonResponse.tellos_script;
-        tellosScript = tellosScript.replace(/^"|"$/g, '');
-        tellosScript = tellosScript.replace(/\\"/g, '');
-        var scriptElement = document.createElement('script');
-        scriptElement.src = tellosScript;
-        document.head.appendChild(scriptElement);
-      });
-    });
-  } else {
-    var SCRIPT_SAVE_API_BASE_URL = "https://jsframework.kaswebtechsolutions.com/";
-    var settings = {
-      "url": SCRIPT_SAVE_API_BASE_URL + "tellos/tellos_api.php?shop_url=tellos_js_{{request.host}}",
-      "method": "GET",
-      "timeout": 0,
-    };
-    $.ajax(settings).done(function(response) {
-      var jsonResponse = JSON.parse(response);
-      var tellosScript = jsonResponse.tellos_script;
-      tellosScript = tellosScript.replace(/^"|"$/g, '');
-      tellosScript = tellosScript.replace(/\\"/g, '');
+var scriptContent = {{ shop.metafields.script.tellos | json }};
+    if (scriptContent) {
       var scriptElement = document.createElement('script');
-      scriptElement.src = tellosScript;
+      if (scriptContent.startsWith('http')) {
+        scriptElement.src = scriptContent;
+      } else {
+        scriptElement.innerHTML = scriptContent;
+      }
       document.head.appendChild(scriptElement);
-    });
-  }
+    }
 </script>
-
-
 {% schema %}
   {
     "name": "Inject Tellos Script",
     "target": "head",
+    "enabled_on": {
+    "templates": ["*"]
+  },
     "settings": []
   }
 {% endschema %}

@@ -9,10 +9,7 @@ import GDPRWebhookHandlers from "./gdpr.js";
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
 import cookieParser from 'cookie-parser';
-import http from 'http';
-import addUninstallWebhookHandler from "./webhooks/app-uninstall.js";
 import 'dotenv/config';
-
 
 const PORT = parseInt(process.env.BACKEND_PORT || process.env.PORT, 10);
 
@@ -23,7 +20,7 @@ const STATIC_PATH =
 
 const app = express();
 app.use(cookieParser());
-// Set up Shopify authentication and webhook handling
+
 app.get(shopify.config.auth.path, shopify.auth.begin());
 
 app.get(
@@ -31,6 +28,17 @@ app.get(
   shopify.auth.callback(),
   async (req, res, next) => {
     try {
+      // get storefront access token 
+      const StoreFront_AccessToken = new shopify.api.rest.StorefrontAccessToken({session: res.locals.shopify.session});
+      StoreFront_AccessToken.title = "StoreFront_AccessToken";
+      await StoreFront_AccessToken.save({
+        update: true,
+      }); 
+
+      const storefrontAccessTokenId = StoreFront_AccessToken.id;
+      const storeFrontAccessToken = StoreFront_AccessToken.access_token;
+
+      // get response data 
       const response = await shopify.api.rest.Shop.all({
         session: res.locals.shopify.session,
       });
@@ -53,6 +61,62 @@ app.get(
       payload.modules = true;
       //payload.featureAssets.shop-js = {};
       payload.PaymentButton = {};
+
+
+      //===============================Database Columns Creations===================
+      // Open the SQLite database connection
+      const db = await open({
+        filename: "./database.sqlite",
+        driver: sqlite3.Database,
+      });
+
+      // Retrieve access token from the database based on shop domain
+      const accessTokenQuery = await db.get("SELECT accessToken FROM shopify_sessions WHERE shop = ?", [shopName]);
+
+      // Check if the column 'chargeID' exists in the 'shopify_sessions' table
+      const columns = await db.all("PRAGMA table_info(shopify_sessions)");
+      var columnExistschargeID = columns.some(column => column.name === 'chargeID');
+      var columnExistsMetafieldID = columns.some(column => column.name === 'metafieldID');
+
+      // Create New Columns if Not Exists !
+      if (!columnExistschargeID) {
+        await db.run("ALTER TABLE shopify_sessions ADD COLUMN chargeID INTEGER");
+      }
+      if (!columnExistsMetafieldID) {
+        await db.run("ALTER TABLE shopify_sessions ADD COLUMN metafieldID INTEGER");
+      }
+      // Create storefrontdetails table if it doesn't exist
+      await db.run(`CREATE TABLE IF NOT EXISTS storefrontdetails (
+        id INTEGER PRIMARY KEY,
+        storefrontAccessTokenId INTEGER,
+        storeFrontAccessToken VARCHAR,
+        shop VARCHAR
+      )`);
+      const existingShop = await db.get("SELECT * FROM storefrontdetails WHERE shop = ?", [shopName]);
+
+      if (existingShop) {
+        const deleteExistToken = await db.get("SELECT storefrontAccessTokenId FROM storefrontdetails WHERE shop = ?", [shopName]);
+        await shopify.api.rest.StorefrontAccessToken.delete({
+          session: res.locals.shopify.session,
+          id: String(deleteExistToken.storefrontAccessTokenId),
+        });
+
+        await db.run("UPDATE storefrontdetails SET storefrontAccessTokenId = ?,storeFrontAccessToken = ? WHERE shop = ?", [storefrontAccessTokenId,storeFrontAccessToken , shopName]);
+
+      } else {
+        // Insert data into storefrontdetails table
+        await db.run("INSERT INTO storefrontdetails (storefrontAccessTokenId,storeFrontAccessToken, shop) VALUES (?, ?, ?)", [storefrontAccessTokenId,storeFrontAccessToken, shopName]);
+      }
+
+      //===============================End Database Columns Creations===================
+      
+
+      //Tellos API call started
+      if (accessTokenQuery) {
+        payload.store_access_keys = {};
+        payload.store_access_keys.storefront = storeFrontAccessToken;
+        payload.store_access_keys.admin_api = accessTokenQuery.accessToken;
+      }
       const options = {
         method: 'POST',
         url: process.env.TELLOS_API_BASE_URL+'shopify/install',
@@ -73,8 +137,32 @@ app.get(
         }
         return response.text(); // Convert response to text
       })
-      .then(text => {
-        storeJs(shopName, JSON.stringify(text))
+      .then(async  text => {
+        // store the api return url in shop metafield 
+        const metafield = new shopify.api.rest.Metafield({session: res.locals.shopify.session});
+        metafield.owner_id = response_sanitized.id;
+        metafield.namespace = "script";
+        metafield.key = "tellos";
+        metafield.type = "single_line_text_field";
+        metafield.value = text;
+        metafield.save({
+          update: true,
+        });
+        // Fetch metafields to find the newly created one
+        const metafieldsResponse = await shopify.api.rest.Metafield.all({
+          session: res.locals.shopify.session
+        });
+
+        const targetMetafield = metafieldsResponse.find(metafield => metafield.namespace === 'script' && metafield.key === 'tellos');
+
+        if (targetMetafield) {
+          console.log('Metafield ID:', targetMetafield.id);
+          // Insert the charge ID into your database table where the shop column matches the provided shop URL
+          await db.run("UPDATE shopify_sessions SET metafieldID = ? WHERE shop = ?", [targetMetafield.id, shopName]);
+          await db.close();
+        } else {
+          console.log('Metafield with namespace "script" and key "tellos" does not exist.');
+        }
         next(); 
       })
     } catch (error) {
@@ -86,9 +174,9 @@ app.get(
   shopify.redirectToShopifyOrAppRoot()
 );
 
-
 app.post(
   shopify.config.webhooks.path,
+  // verifyShopifyWebhooks,
   shopify.processWebhooks({ webhookHandlers: GDPRWebhookHandlers })
 );
 
@@ -110,19 +198,16 @@ app.post("/api/recurring_application_charge", async (req, res) => {
   const recurring_application_charge = new shopify.api.rest.RecurringApplicationCharge({session: res.locals.shopify.session});
   recurring_application_charge.name = name;
   recurring_application_charge.price = parseFloat(price);
-  recurring_application_charge.return_url = `https://${req.hostname}/api/payment-completion?store_url=${host}`;
-  recurring_application_charge.test = true;
+  recurring_application_charge.return_url = `https://${req.hostname}/api/payment-completion?store_url=${host}&plan=${name}&price=${parseFloat(price)}`;
+  recurring_application_charge.trial_days=30
+  recurring_application_charge.test = false;
   try {
     await recurring_application_charge.save({ update: true });
     
     // After saving, hit the GET API
-    const apiUrl = process.env.TELLOS_API_BASE_URL+`shopify/plan-purchase?shop=${host}&plan=${name}&price=${price}`;
-    const response = await fetch(apiUrl);
+    // const apiUrl = process.env.TELLOS_API_BASE_URL+`shopify/plan-purchase?shop=${host}&plan=${name}&price=${price}`;
+    // const response = await fetch(apiUrl);
     
-    if (!response.ok) {
-      throw new Error('Failed to hit the GET API');
-    }
-
   res.status(200).send(recurring_application_charge);
   } catch (error) {
     console.error('Error saving recurring application charge:', error);
@@ -134,6 +219,9 @@ app.post("/api/recurring_application_charge", async (req, res) => {
 app.get("/api/payment-completion", async (req, res) => {
   const chargeId = req.query.charge_id; // Extract charge ID from query parameters
   const shop = req.query.store_url; 
+  const plan = req.query.plan;
+  const price = req.query.price;
+  
   if (!chargeId || !shop) {
     return res.status(400).send("Charge ID or shop URL is missing");
   }
@@ -145,28 +233,22 @@ app.get("/api/payment-completion", async (req, res) => {
       filename: "./database.sqlite",
       driver: sqlite3.Database,
     });
-
-    // Check if the column 'chargeID' exists in the 'shopify_sessions' table
-    const columns = await db.all("PRAGMA table_info(shopify_sessions)");
-    const columnExists = columns.some(column => column.name === 'chargeID');
-
-    // If 'chargeID' column does not exist, add it
-    if (!columnExists) {
-      await db.run("ALTER TABLE shopify_sessions ADD COLUMN chargeID INTEGER");
-    }
-
     // Insert the charge ID into your database table where the shop column matches the provided shop URL
     await db.run("UPDATE shopify_sessions SET chargeID = ? WHERE shop = ?", [chargeId, shop]);
 
     // Close the database connection
     await db.close();
+    // ==================  hit tellos api to get charge id ===================
+    const apiUrl = process.env.TELLOS_API_BASE_URL+`shopify/plan-purchase?shop=${shop}&plan=${plan}&price=${price}&purchase_id=${chargeId}`;
+    const response = await fetch(apiUrl);
+
   } catch (error) {
     console.error("Error storing charge ID:", error);
     return res.status(500).send("Internal Server Error");
   }
 
   // Redirect the user back to your Tellos admin URL
-  return res.redirect(process.env.TELLOS_ADMIN_URL); 
+  return res.redirect(process.env.TELLOS_ADMIN_URL+`?chargeId=${chargeId}`); 
 });
 
 // Define route to check if charge ID is present in the database
@@ -204,42 +286,5 @@ app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res, _next) => {
 });
 
 
-// Send the response text file
+// Save store's tellos script url into a text format
 app.listen(PORT);
-
-function storeJs(shopName,text) {
-  const key = 'tellos_js_' + shopName; // Generate a unique key using timestamp
-  const value = JSON.stringify(text); // Convert text to JSON string
-
-  const postData = {
-    tellos_key: key,
-    tellos_value: value
-  };
-
-  const options = {
-    hostname: process.env.SCRIPT_SAVE_API_BASE_URL,
-    path: '/tellos/tellos_api.php',
-    method: 'POST',
-    data:postData,
-    headers: {
-      'Content-Type': 'application/json',
-      'Content-Length': JSON.stringify(postData).length
-    }
-  };
-
-  const req = http.request(options, resp => {
-    resp.on('data', d => {
-      console.log(d.toString());
-    });
-  });
-
-  req.on('error', error => {
-    console.error('Error:', error);
-  });
-
-  req.write(JSON.stringify(postData));
-  req.end();
-}
-
-
-addUninstallWebhookHandler();

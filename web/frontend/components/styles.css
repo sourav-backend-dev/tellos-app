@@ -1,17 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
 * {
   padding: 0;
   margin: 0;
-  font-family: "Poppins";
 }
 
 body {
   background-color: #e9e9e9;
+  font-family: Montserrat, sans-serif !important;
 }
 
 /* navbar style  */
 
 .navbar {
-  background-color: #333; /* Background color of the navbar */
   overflow: hidden;
 }
 
@@ -22,7 +23,9 @@ body {
 }
 
 .navbar-logo img {
-  height: 50px; /* Adjust logo height as needed */
+  height: 40px; /* Adjust logo height as needed */
+  width: 100px;
+  margin-left: 40%;
 }
 
 /* Links styling */
@@ -48,9 +51,9 @@ body {
 }
 
 /* #pricing table title  */
-.chart-title{
+.chart-title h1{
   font-size: 28px;
-  font-weight: 800;
+  font-weight: 700;
   margin: 20px;
 }
 .pricing-wrapper {
@@ -63,7 +66,12 @@ body {
 }
 
 .pricing-title h2 {
-  font-size: 2.5rem;
+  color: #000;
+  margin-top: 0;
+  margin-bottom: 0;
+  font-size: 45px;
+  font-weight: 700;
+  line-height: 1.1;
 }
 .pricing-paragraph p {
   font-size: 1.4rem;
@@ -84,27 +92,32 @@ body {
 
 .pricing-chart-wraaper {
   display: grid;
-  cursor: pointer;
   transition: all 3s ease 0s;
   justify-content: center;
-  gap: 15px;
+  gap: 50px;
   display: flex;
   flex-wrap: wrap;
   text-align: center;
 }
-
+.chart-cont3_1{
+  font-size: 12px;
+}
+.check-img{
+  margin-right: 5px;
+}
 .pricing-chart {
-  border-radius: 8px;
+  border-radius: 10px;
   background-color: rgb(255, 255, 255);
-  padding: 30px 15px 40px 15px;
+  padding: 30px 0px 40px 15px;
   border: 1px solid#fff;
   max-width: 100%;
-  width: 20%;
+  width: 23%;
   display: flex;
   flex-direction: column;
   gap: 25px;
   animation: 5s ease-in-out 0s 1 normal none running all;
   box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+  position:relative;
 }
 
 .pricing-chart:hover {
@@ -127,7 +140,7 @@ body {
 }
 .chart-cont3  h4{
   font-size: larger;
-  font-weight: 800;
+  font-weight: 700;
 }
 .chart-cont3_2 ul {
   list-style: none;
@@ -146,13 +159,22 @@ body {
 .chart-desc h1,
 .chart-pricing-cont h1 {
   font-size: 28px;
-  font-weight: 800;
+  font-weight: 700;
   margin: 10px;
+}
+.chart-trial-cont{
+  text-align: center;
+  position: relative;
+  bottom: 0px;
 }
 
 .chart-desc p,
 .chart-pricing-cont p {
-  font-size: 15px;
+  font-size: 14px;
+}
+
+.chart-pricing-cont p {
+  opacity: 0.6;
 }
 
 .chart-btn button {
@@ -171,6 +193,40 @@ body {
 span.month {
   font-size: 19px;
 }
+
+.ribbon-2 {
+  --f: 10px; /* control the folded part*/
+  --r: 15px; /* control the ribbon shape */
+  --t: 10px; /* the top offset */
+  
+  position: absolute;
+  inset: var(--t) calc(-1*var(--f)) auto auto;
+  padding: 0 10px var(--f) calc(10px + var(--r));
+  clip-path: 
+    polygon(0 0,100% 0,100% calc(100% - var(--f)),calc(100% - var(--f)) 100%,
+      calc(100% - var(--f)) calc(100% - var(--f)),0 calc(100% - var(--f)),
+      var(--r) calc(50% - var(--f)/2));
+  background: #fd4970;
+  box-shadow: 0 calc(-1*var(--f)) 0 inset #0005;
+  color: #fff;
+  
+}
+
+.spacer-xs {
+  width: 100%;
+  height: 10px;
+}
+
+.paragraph-12 {
+  opacity: .9;
+  color: #000;
+  font-size: 20px;
+  font-weight: 300;
+  line-height: 1.5;
+  color: #fd4970;
+  text-align: center;
+}
+
 @media (max-width: 590px) {
   .pricing-title h2 {
     font-size: 2.1rem;
